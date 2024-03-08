@@ -1,0 +1,116 @@
+h1 {
+  font-size: 2rem;
+}
+
+select {
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #dddddd;
+  padding: 5px;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+.delaySelect {
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 1.5rem;
+  border: none;
+  color: #dddddd;
+  padding: 3px 3.8px;
+  width: 4rem;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+#notesSet {
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 1.5rem;
+  border: none;
+  color: #dddddd;
+  padding: 3px 3.8px;
+  padding-bottom: 5.25px;
+  width: 4rem;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+#addButton {
+  display: inline-block;
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 1.5rem;
+  border: none;
+  color: #dddddd;
+  padding: 3px 2px;
+  padding-bottom: 5.25px;
+  width: 4rem;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+#instructions {
+  color: #dddddd;
+  margin: 1vh 0px;
+}
+
+button {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #dddddd;
+  padding: 5px;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+h1,
+.check,
+.keys {
+  display: inline-block;
+}
+
+#options {
+  /* display: none; */
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #dddddd;
+  width: 90%;
+  height: 90%;
+  position: fixed;
+  top: 5%;
+  left: 5%;
+  padding: 3%;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+}
+
+#charSelect {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 2vh 2vw;
+}
+
+.keys {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #dddddd;
+  font-size: 1.25rem;
+  padding: 15px 6px;
+  width: 60px;
+  border: none;
+  border-radius: 5%;
+  box-shadow: none;
+}
+
+.noteCreator {
+  font-size: 1.5rem;
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 0px;
+}
+
+#sfxSetter {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 1vw;
+}
+
+#sfxNotes {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 1vw;
+}
