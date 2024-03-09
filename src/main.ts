@@ -269,7 +269,14 @@ let soundEffects: SFX[] = [
   { note: ['E6'], duration: ['4n'], delay: ['0'] },
 ];
 
-let anims: Function[] = [C_Spots];
+let anims: Function[] = [
+  C_Spots,
+  C_Flicker,
+  C_RightSwoosh,
+  C_LeftSwoosh,
+  C_Swoosh,
+  C_Eclipse,
+];
 
 interface AnimPairs {
   char: string;
@@ -278,29 +285,29 @@ interface AnimPairs {
 
 let charAnimPairs: AnimPairs[] = [
   { char: chars[0], anim: anims[0] },
-  { char: chars[1], anim: anims[0] },
-  { char: chars[2], anim: anims[0] },
-  { char: chars[3], anim: anims[0] },
-  { char: chars[4], anim: anims[0] },
-  { char: chars[5], anim: anims[0] },
+  { char: chars[1], anim: anims[1] },
+  { char: chars[2], anim: anims[2] },
+  { char: chars[3], anim: anims[3] },
+  { char: chars[4], anim: anims[4] },
+  { char: chars[5], anim: anims[5] },
   { char: chars[6], anim: anims[0] },
-  { char: chars[7], anim: anims[0] },
-  { char: chars[8], anim: anims[0] },
-  { char: chars[9], anim: anims[0] },
-  { char: chars[10], anim: anims[0] },
-  { char: chars[11], anim: anims[0] },
+  { char: chars[7], anim: anims[1] },
+  { char: chars[8], anim: anims[2] },
+  { char: chars[9], anim: anims[3] },
+  { char: chars[10], anim: anims[4] },
+  { char: chars[11], anim: anims[5] },
   { char: chars[12], anim: anims[0] },
-  { char: chars[13], anim: anims[0] },
-  { char: chars[14], anim: anims[0] },
-  { char: chars[15], anim: anims[0] },
-  { char: chars[16], anim: anims[0] },
-  { char: chars[17], anim: anims[0] },
+  { char: chars[13], anim: anims[1] },
+  { char: chars[14], anim: anims[2] },
+  { char: chars[15], anim: anims[3] },
+  { char: chars[16], anim: anims[4] },
+  { char: chars[17], anim: anims[5] },
   { char: chars[18], anim: anims[0] },
-  { char: chars[19], anim: anims[0] },
-  { char: chars[20], anim: anims[0] },
-  { char: chars[21], anim: anims[0] },
-  { char: chars[22], anim: anims[0] },
-  { char: chars[23], anim: anims[0] },
+  { char: chars[19], anim: anims[1] },
+  { char: chars[20], anim: anims[2] },
+  { char: chars[21], anim: anims[3] },
+  { char: chars[22], anim: anims[4] },
+  { char: chars[23], anim: anims[5] },
   { char: chars[24], anim: anims[0] },
   { char: chars[25], anim: anims[0] },
 ];
@@ -388,6 +395,296 @@ function A_Spots(param: I_Spots) {
     ctx!.arc(param.xList[i], param.yList[i], 10, 0, 2 * Math.PI);
     ctx!.fill();
   }
+}
+
+//#endregion
+
+//#region Flicker
+
+function C_Flicker() {
+  let _flick = `hsl(${color.hue + 50}, ${color.sat}%, ${color.light[0]}%)`;
+  let _duration = 45;
+
+  let _params: I_Flicker = {
+    flick: _flick,
+    switch: 5,
+  };
+
+  activeAnims.push({
+    anim: A_Flicker,
+    duration: _duration,
+    params: _params,
+  });
+}
+
+interface I_Flicker {
+  flick: string;
+  switch: number;
+}
+
+function A_Flicker(param: I_Flicker) {
+  if (param.switch == 0) {
+    let temp = body.style.backgroundColor;
+    body.style.backgroundColor = param.flick;
+    param.flick = temp;
+    param.switch = 7;
+  }
+  param.switch--;
+}
+
+//#endregion
+
+//#region Swoosh
+
+function C_Swoosh() {
+  let _leftSide = 0;
+  let _rightSide = 0;
+  let _currentFrame = 0;
+  let _duration = 7;
+
+  let _params: I_Swoosh = {
+    leftSide: _leftSide,
+    rightSide: _rightSide,
+    currentFrame: _currentFrame,
+  };
+
+  activeAnims.push({
+    anim: A_Swoosh,
+    duration: _duration,
+    params: _params,
+  });
+}
+
+function C_LeftSwoosh() {
+  let _leftSide = 0;
+  let _rightSide = 0;
+  let _currentFrame = 0;
+  let _duration = 30;
+
+  let _params: I_Swoosh = {
+    leftSide: _leftSide,
+    rightSide: _rightSide,
+    currentFrame: _currentFrame,
+  };
+
+  activeAnims.push({
+    anim: A_LeftSwoosh,
+    duration: _duration,
+    params: _params,
+  });
+}
+
+function C_RightSwoosh() {
+  let _leftSide = 0;
+  let _rightSide = 0;
+  let _currentFrame = 0;
+  let _duration = 30;
+
+  let _params: I_Swoosh = {
+    leftSide: _leftSide,
+    rightSide: _rightSide,
+    currentFrame: _currentFrame,
+  };
+
+  activeAnims.push({
+    anim: A_RightSwoosh,
+    duration: _duration,
+    params: _params,
+  });
+}
+
+interface I_Swoosh {
+  leftSide: number;
+  rightSide: number;
+  currentFrame: number;
+}
+
+function A_Swoosh(param: I_Swoosh) {
+  param.leftSide += Math.pow(2, param.currentFrame);
+  param.rightSide += Math.pow(2, 7 - param.currentFrame / 30);
+
+  ctx!.beginPath();
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  ctx!.rect(
+    canvas.width / 5 + param.leftSide,
+    canvas.height / 4,
+    param.rightSide,
+    canvas.height / 2,
+  );
+  ctx!.fill();
+  param.currentFrame++;
+}
+
+function A_LeftSwoosh(param: I_Swoosh) {
+  param.leftSide += Math.pow(2, param.currentFrame);
+
+  ctx!.beginPath();
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  ctx!.rect(
+    0,
+    canvas.height / 4,
+    (canvas.width / 4) * 3 - param.leftSide,
+    canvas.height / 2,
+  );
+  ctx!.fill();
+  param.currentFrame++;
+}
+
+function A_RightSwoosh(param: I_Swoosh) {
+  param.leftSide += Math.pow(2, param.currentFrame);
+  param.rightSide += Math.pow(2, 30 - param.currentFrame);
+
+  ctx!.beginPath();
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  ctx!.rect(
+    canvas.width / 4 + param.leftSide,
+    canvas.height / 4,
+    param.rightSide,
+    canvas.height / 2,
+  );
+  ctx!.fill();
+  param.currentFrame++;
+}
+
+//#endregion
+
+//#region Eclipse
+
+let firstStart = [canvas.width / 2, canvas.height / 2];
+let firstGoal = [canvas.width, 0];
+let secondStart = [0, canvas.height];
+let secondGoal = [canvas.width / 2, canvas.height / 2];
+
+function C_Eclipse() {
+  let _firstCircle = firstStart;
+  let _secondCircle = secondStart;
+  let _duration = 75;
+
+  let _params: I_Eclipse = {
+    firstCircle: _firstCircle,
+    secondCircle: _secondCircle,
+    duration: _duration,
+  };
+
+  activeAnims.push({
+    anim: A_Eclipse,
+    duration: _duration,
+    params: _params,
+  });
+}
+
+interface I_Eclipse {
+  firstCircle: number[];
+  secondCircle: number[];
+  duration: number;
+}
+
+//e key Patatap
+function A_Eclipse(param: I_Eclipse) {
+  ctx!.beginPath();
+
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  ctx!.arc(
+    canvas.width / 2,
+    canvas.height / 2,
+    canvas.width / 8,
+    0,
+    2 * Math.PI,
+  );
+  ctx!.fill();
+
+  ctx!.beginPath();
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[0]}%)`;
+  ctx!.arc(
+    param.firstCircle[0],
+    param.firstCircle[1],
+    canvas.width / 8,
+    0,
+    2 * Math.PI,
+  );
+  ctx!.fill();
+
+  ctx!.arc(
+    param.secondCircle[0],
+    param.secondCircle[1],
+    canvas.width / 8,
+    0,
+    2 * Math.PI,
+  );
+  ctx!.fill();
+
+  let moveX = canvas.width / 2;
+  let moveY = canvas.height / 2;
+
+  param.duration--;
+
+  moveX = moveX / param.duration;
+  moveY = moveY / param.duration;
+
+  param.firstCircle = [
+    param.firstCircle[0] + moveX,
+    param.firstCircle[1] + moveY,
+  ];
+
+  moveX = moveX / param.duration;
+  moveY = moveY / param.duration;
+
+  param.secondCircle = [
+    param.secondCircle[0] + moveX,
+    param.secondCircle[1] + moveY,
+  ];
+
+  // function A_Eclipse(param: I_Eclipse) {
+  //   ctx!.beginPath();
+
+  //   ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  //   ctx!.arc(
+  //     canvas.width / 2,
+  //     canvas.height / 2,
+  //     canvas.width / 4,
+  //     0,
+  //     2 * Math.PI,
+  //   );
+  //   ctx!.fill();
+
+  //   ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[0]}%)`;
+  //   ctx!.arc(
+  //     param.firstCircle[0],
+  //     param.firstCircle[1],
+  //     canvas.width / 4,
+  //     0,
+  //     2 * Math.PI,
+  //   );
+
+  //   ctx!.arc(
+  //     param.secondCircle[0],
+  //     param.secondCircle[1],
+  //     canvas.width / 4,
+  //     0,
+  //     2 * Math.PI,
+  //   );
+  //   ctx!.fill();
+
+  //   let moveX = canvas.width / 2;
+  //   let moveY = canvas.height / 2;
+
+  //   param.duration--;
+
+  //   moveX = moveX / param.duration;
+  //   moveY = moveY / param.duration;
+
+  //   param.firstCircle = [
+  //     param.firstCircle[0] + moveX,
+  //     param.firstCircle[1] + moveY,
+  //   ];
+
+  //   moveX = moveX / param.duration;
+  //   moveY = moveY / param.duration;
+
+  //   param.secondCircle = [
+  //     param.secondCircle[0] + moveX,
+  //     param.secondCircle[1] + moveY,
+  //   ];
 }
 
 //#endregion

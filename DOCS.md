@@ -1,16 +1,18 @@
 As part of your submission, update this file with answers:
 
+Note: The controls are not stated, but press space to start the program and refresh the page. Press shift to adjust the notes played by each key.
+
 #### 1. What sort of story or experience are you conveying with your project?
 
 I wasn't sure what direction that I was going with at first, but now I would say I am trying to make a small but fun interactive music toolbox which makes it easy to make music and fun to do too!
 
 #### 2. Which animation techniques did you use?
 
-UHH Dots. So far I have one animation and I'm not sure how much more I'll really be able to get. I just spawned random white dots over the screen. Due to how my thing is structured, writing the code for an animation is more cumbersome than I'd like it to be, so implementing even simple animations is tough.
+I implemented around 6 visual effects, 5 of which were types of animation. I would have liked to implemented enough for one animation per key (26), and the one's I have are fairly simple / similar. They all involve moving items around or changing their shape, so pretty simple. Granted, my animation system runs a bit differently than just painting to the canvas, and can support multiple animations playing at the same time, overlapping without limit, so that's nice.
 
 #### 3. What did you do for the "Beyond Baseline" requirement?
 
-It's basically an Interactive Synth Keyboard with Animation, and with fully customizable notes (press shift so you can edit all of the note assignments, and even assign multiple notes to a single button to make some fun chords if you want.) None of the interface stuff is perfect because I'm speedrunning to get it remotely done for submission, but it is very versatile all things considered.
+It's basically an Interactive Synth Keyboard with Animation, and with fully customizable notes (press shift so you can edit all of the note assignments, and even assign multiple notes to a single button to make some fun chords if you want). None of the interface stuff is perfect because I'm speedrunning to get it remotely done for submission, but it is very versatile all things considered. Also I did try to make sure the visual style is pleasing and nice to really achieve the effect of Patatap (the thing I based it off), and I feel like I did a good job.
 
 #### 4. What gave you difficulty with this assignment?
 
