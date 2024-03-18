@@ -4,32 +4,27 @@ import * as Tone from 'tone';
 let body = document.querySelector('body') as HTMLBodyElement;
 let canvas = document.querySelector('#canvas') as HTMLCanvasElement;
 let options = document.querySelector('#options') as HTMLDivElement;
+let keys: NodeListOf<HTMLButtonElement>;
 
-let sfxNotes = document.querySelector('#sfxNotes') as HTMLDivElement;
-let charSelect = document.querySelector('#charSelect') as HTMLDivElement;
-let setNote = document.querySelector('#notesSet') as HTMLButtonElement;
-let addButton = document.querySelector('#addButton') as HTMLButtonElement;
+const ctx = canvas.getContext('2d');
 
 let currentKey = 0;
-
-const synth = new Tone.Synth().toDestination();
-const ctx = canvas.getContext('2d');
+let currentAnimationID = 0;
 
 //#region Window Setup
 
 window.onload = () => {
-  reset();
-  generateKeys();
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+
+  reset();
+  generateKeys();
+  generateAnims();
+
+  ctx!.save();
+  ctx!.translate(canvas.width / 2 - 75, canvas.height / 2);
+  titleLoop();
 };
-
-function reset() {
-  color.hue = Math.floor(Math.random() * 360);
-  ctx!.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-  body.style.backgroundColor = `hsl(${color.hue}, ${color.sat}%, ${color.light[0]}%)`;
-}
 
 function generateKeys() {
   chars.forEach((element) => {
@@ -39,35 +34,42 @@ function generateKeys() {
 }
 
 function setKeys() {
-  let keys = document.querySelectorAll('.keys');
+  keys = document.querySelectorAll('.keys');
 
   keys.forEach((element) => {
     element.addEventListener('click', switchKey);
   });
 }
 
-//prettier-ignore
-setNote.addEventListener("click", () => {
-    let soundEffect = soundEffects[currentKey];
+function generateAnims() {
+  anims.forEach((func) => {
+    const name = func.name.substring(2);
+    let option = document.createElement('option');
 
-    soundEffect.note.splice(0, soundEffect.note.length);
-    soundEffect.duration.splice(0, soundEffect.duration.length);
-    soundEffect.delay.splice(0, soundEffect.delay.length);
+    option.value = func.name;
+    option.className = 'animOption';
+    option.innerHTML = name;
 
-    let strings: NodeListOf<HTMLSelectElement> = document.querySelectorAll(".letterSelect");
-    let octaves: NodeListOf<HTMLSelectElement> = document.querySelectorAll(".numberSelect");
-    let durations: NodeListOf<HTMLSelectElement> = document.querySelectorAll(".durationSelect");
-    let delays: NodeListOf<HTMLInputElement> = document.querySelectorAll(".delaySelect");
+    animSelect.appendChild(option);
+  });
+}
 
-    for(let i = 0; i < strings.length; i++) {
-        soundEffect.note.push(strings[i].value.concat(octaves[i].value));
-        soundEffect.duration.push(durations[i].value);
-        console.log(delays[i].value);
-        soundEffect.delay.push(delays[i].value);
-    }
-});
+let hueSet = document.querySelector('#hue') as HTMLInputElement;
+let satSet = document.querySelector('#saturation') as HTMLInputElement;
+let lightSet = document.querySelector('#lightness') as HTMLInputElement;
+
+function colorSet() {
+  hueSet.value = color.hue.toString();
+  satSet.value = color.sat.toString();
+  lightSet.value = color.light[0].toString();
+}
 
 function switchKey(this: HTMLButtonElement) {
+  keys.forEach((element) => {
+    element.style.backgroundColor = `rgba(0, 0, 0, 0.5)`;
+  });
+
+  this.style.backgroundColor = `rgba(64, 64, 64, 0.5)`;
   currentKey = chars.indexOf(this.value);
 
   let soundEffect = soundEffects[currentKey];
@@ -80,7 +82,8 @@ function switchKey(this: HTMLButtonElement) {
     <select class="letterSelect"></select>
     <select class="numberSelect"></select>
     <select class="durationSelect"></select>
-    <input type="number" class="delaySelect" value="0" inputmode="numeric" step="0.01" min="0" max="10"></input></div>`;
+    <input type="number" class="delaySelect" value="0" inputmode="numeric" step="0.01" min="0" max="10"></input>
+    <button class="removeNote">X</button></div>`;
   }
 
   let count = 0;
@@ -130,7 +133,99 @@ function switchKey(this: HTMLButtonElement) {
     select.value = soundEffect.delay[count];
     count++;
   });
+
+  addRemoveButton();
+
+  let anim = charAnimPairs[currentKey].anim;
+  let animOptions: NodeListOf<HTMLOptionElement> =
+    document.querySelectorAll('.animOption');
+
+  animOptions.forEach((option) => {
+    if (option.value == anim.name) {
+      option.selected = true;
+    } else {
+      option.selected = false;
+    }
+  });
 }
+
+function addRemoveButton() {
+  let removes: NodeListOf<HTMLButtonElement> =
+    document.querySelectorAll('.removeNote');
+
+  removes.forEach((element) => {
+    element.addEventListener('click', () => {
+      element.parentElement!.remove();
+    });
+  });
+}
+
+//#endregion
+
+//#region Input Handling
+
+function reset() {
+  color.hue = Math.floor(Math.random() * 360);
+  ctx!.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  body.style.backgroundColor = `hsl(${color.hue}, ${color.sat}%, ${color.light[0]}%)`;
+  colorSet();
+}
+
+let sfxNotes = document.querySelector('#sfxNotes') as HTMLDivElement;
+let charSelect = document.querySelector('#charSelect') as HTMLDivElement;
+let setNote = document.querySelector('#notesSet') as HTMLButtonElement;
+let animSelect = document.querySelector('#animSet') as HTMLSelectElement;
+
+setNote.addEventListener('click', () => {
+  let soundEffect = soundEffects[currentKey];
+
+  soundEffect.note.splice(0, soundEffect.note.length);
+  soundEffect.duration.splice(0, soundEffect.duration.length);
+  soundEffect.delay.splice(0, soundEffect.delay.length);
+
+  let strings: NodeListOf<HTMLSelectElement> =
+    document.querySelectorAll('.letterSelect');
+  let octaves: NodeListOf<HTMLSelectElement> =
+    document.querySelectorAll('.numberSelect');
+  let durations: NodeListOf<HTMLSelectElement> =
+    document.querySelectorAll('.durationSelect');
+  let delays: NodeListOf<HTMLInputElement> =
+    document.querySelectorAll('.delaySelect');
+
+  for (let i = 0; i < strings.length; i++) {
+    soundEffect.note.push(strings[i].value.concat(octaves[i].value));
+    soundEffect.duration.push(durations[i].value);
+    soundEffect.delay.push(delays[i].value);
+  }
+
+  anims.forEach((element) => {
+    if (animSelect.value == element.name)
+      charAnimPairs[currentKey].anim = element;
+  });
+
+  body.style.backgroundColor = `hsl(${Number(hueSet.value)}, ${Number(satSet.value)}%, ${Number(lightSet.value)}%)`;
+});
+
+window.addEventListener('keydown', function (e) {
+  playSound(e.key);
+  if (e.key == ' ') {
+    this.cancelAnimationFrame(currentAnimationID);
+    ctx!.restore();
+    reset();
+    animationLoop();
+    Tone.start();
+  }
+  if (e.key == 'Shift') {
+    if (options.style.display == 'none') {
+      options.style.display = 'grid';
+    } else {
+      options.style.display = 'none';
+    }
+  }
+});
+
+let addButton = document.querySelector('#addButton') as HTMLButtonElement;
 
 addButton.addEventListener('click', () => {
   let parentSection = document.createElement('div');
@@ -165,27 +260,15 @@ addButton.addEventListener('click', () => {
   parentSection.appendChild(_durations);
 
   parentSection.innerHTML += `<input type="number" class="delaySelect" value="0" inputmode="numeric" step="0.01" min="0" max="10"></input>`;
+  parentSection.innerHTML += `<button class="removeNote">X</button>`;
 
   sfxNotes.appendChild(parentSection);
+  addRemoveButton();
 });
 
 //#endregion
 
-window.addEventListener('keydown', function (e) {
-  playSound(e.key);
-  if (e.key == ' ') {
-    reset();
-    animationLoop();
-    Tone.start();
-  }
-  if (e.key == 'Shift') {
-    if (options.style.display == 'none') {
-      options.style.display = 'flex';
-    } else {
-      options.style.display = 'none';
-    }
-  }
-});
+//#region Color
 
 interface Color {
   sat: number;
@@ -198,6 +281,17 @@ let color: Color = {
   light: [80, 95, 5],
   hue: 0,
 };
+
+//#endregion
+
+//#region SFXs
+
+//Synth Types
+const synth = new Tone.Synth().toDestination();
+const amSynth = new Tone.AMSynth().toDestination();
+const fmSynth = new Tone.FMSynth().toDestination();
+const duoSynth = new Tone.DuoSynth().toDestination();
+const memSynth = new Tone.MembraneSynth().toDestination();
 
 let chars: string[] = [
   'a',
@@ -269,49 +363,6 @@ let soundEffects: SFX[] = [
   { note: ['E6'], duration: ['4n'], delay: ['0'] },
 ];
 
-let anims: Function[] = [
-  C_Spots,
-  C_Flicker,
-  C_RightSwoosh,
-  C_LeftSwoosh,
-  C_Swoosh,
-  C_Eclipse,
-];
-
-interface AnimPairs {
-  char: string;
-  anim: Function;
-}
-
-let charAnimPairs: AnimPairs[] = [
-  { char: chars[0], anim: anims[0] },
-  { char: chars[1], anim: anims[1] },
-  { char: chars[2], anim: anims[2] },
-  { char: chars[3], anim: anims[3] },
-  { char: chars[4], anim: anims[4] },
-  { char: chars[5], anim: anims[5] },
-  { char: chars[6], anim: anims[0] },
-  { char: chars[7], anim: anims[1] },
-  { char: chars[8], anim: anims[2] },
-  { char: chars[9], anim: anims[3] },
-  { char: chars[10], anim: anims[4] },
-  { char: chars[11], anim: anims[5] },
-  { char: chars[12], anim: anims[0] },
-  { char: chars[13], anim: anims[1] },
-  { char: chars[14], anim: anims[2] },
-  { char: chars[15], anim: anims[3] },
-  { char: chars[16], anim: anims[4] },
-  { char: chars[17], anim: anims[5] },
-  { char: chars[18], anim: anims[0] },
-  { char: chars[19], anim: anims[1] },
-  { char: chars[20], anim: anims[2] },
-  { char: chars[21], anim: anims[3] },
-  { char: chars[22], anim: anims[4] },
-  { char: chars[23], anim: anims[5] },
-  { char: chars[24], anim: anims[0] },
-  { char: chars[25], anim: anims[0] },
-];
-
 function playSound(char: string) {
   if (!chars.includes(char)) {
     return;
@@ -331,6 +382,148 @@ function playSound(char: string) {
     );
   }
 }
+
+//#endregion
+
+//#region Animation
+
+let angle = 0;
+let speed = 9000;
+let clockwise = true;
+
+function titleLoop() {
+  currentAnimationID = requestAnimationFrame(titleLoop);
+
+  ctx!.fillStyle = `${body.style.backgroundColor}`;
+  ctx!.fillRect(
+    -canvas.width / 2,
+    -canvas.height / 2,
+    canvas.width,
+    canvas.height,
+  );
+
+  ctx!.shadowColor = 'black';
+  ctx!.shadowBlur = 100;
+  ctx!.lineWidth = 3;
+
+  ctx!.moveTo(0, -canvas.height / 2);
+  ctx!.lineTo(-240, 100);
+  ctx!.strokeStyle = `hsla(${color.hue}, ${color.sat}%, ${color.light[2]}%, 0.005)`;
+  ctx!.fillStyle = 'none';
+  ctx!.stroke();
+
+  ctx!.moveTo(60, -canvas.height / 2);
+  ctx!.lineTo(320, 128);
+  ctx!.strokeStyle = `hsla(${color.hue}, ${color.sat}%, ${color.light[2]}%, 0.02)`;
+  ctx!.fillStyle = 'none';
+  ctx!.stroke();
+
+  ctx!.fillStyle = `hsla(${color.hue}, ${color.sat}%, ${color.light[2]}%, 0.02)`;
+  ctx!.font = `144px sans-serif`;
+  ctx!.fillText('Rolodope', -260, 202);
+
+  ctx!.shadowBlur = 0;
+
+  ctx!.beginPath();
+  ctx!.moveTo(-30, -canvas.height / 2);
+  ctx!.lineTo(-280, 80);
+  ctx!.strokeStyle = 'white';
+  ctx!.fillStyle = 'none';
+  ctx!.stroke();
+
+  ctx!.moveTo(30, -canvas.height / 2);
+  ctx!.lineTo(280, 100);
+  ctx!.strokeStyle = 'white';
+  ctx!.fillStyle = 'none';
+  ctx!.stroke();
+
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  ctx!.font = `144px sans-serif`;
+  ctx!.fillText('Rolodope', -300, 172);
+
+  ctx!.font = `26px sans-serif`;
+  ctx!.fillText('Press', -canvas.width / 4 + 45, -canvas.height / 4 - 35);
+
+  ctx!.font = `32px sans-serif`;
+  ctx!.fillText('SHIFT', -canvas.width / 4, -canvas.height / 4);
+
+  ctx!.font = `26px sans-serif`;
+  ctx!.fillText('for Options', -canvas.width / 4 - 45, -canvas.height / 4 + 30);
+
+  ctx!.font = `26px sans-serif`;
+  ctx!.fillText('Press', canvas.width / 4 - 30, -canvas.height / 4 - 35);
+
+  ctx!.font = `32px sans-serif`;
+  ctx!.fillText('SPACE', canvas.width / 4, -canvas.height / 4);
+
+  ctx!.font = `26px sans-serif`;
+  ctx!.fillText('to Start', canvas.width / 4 + 30, -canvas.height / 4 + 30);
+
+  if (angle > Math.PI / 40) {
+    clockwise = false;
+  }
+  if (angle < -(Math.PI / 40)) {
+    clockwise = true;
+  }
+
+  let ease = BezierCurve(Math.abs((angle / speed) * 20000) + 1);
+  let rotation = clockwise ? Math.PI / speed : -(Math.PI / speed);
+  let shift = clockwise ? -1 * ease : 1 * ease;
+
+  ctx!.translate(shift, 0);
+  ctx!.rotate(rotation);
+
+  angle += rotation;
+}
+
+//found on stack overflow: https://stackoverflow.com/questions/13462001/ease-in-and-ease-out-animation-formula
+let BezierCurve = (t: number) => {
+  return t * t * (3.0 - 2.0 * t);
+};
+
+let anims: Function[] = [
+  C_Spots,
+  C_Flicker,
+  C_RightSwoosh,
+  C_LeftSwoosh,
+  C_Swoosh,
+  C_Eclipse,
+  C_CircleSkew,
+];
+
+interface AnimPairs {
+  char: string;
+  anim: Function;
+}
+
+let charAnimPairs: AnimPairs[] = [
+  { char: chars[0], anim: anims[0] },
+  { char: chars[1], anim: anims[1] },
+  { char: chars[2], anim: anims[2] },
+  { char: chars[3], anim: anims[3] },
+  { char: chars[4], anim: anims[4] },
+  { char: chars[5], anim: anims[5] },
+  { char: chars[6], anim: anims[6] },
+  { char: chars[7], anim: anims[1] },
+  { char: chars[8], anim: anims[2] },
+  { char: chars[9], anim: anims[3] },
+  { char: chars[10], anim: anims[4] },
+  { char: chars[11], anim: anims[5] },
+  { char: chars[12], anim: anims[6] },
+  { char: chars[13], anim: anims[1] },
+  { char: chars[14], anim: anims[2] },
+  { char: chars[15], anim: anims[3] },
+  { char: chars[16], anim: anims[4] },
+  { char: chars[17], anim: anims[5] },
+  { char: chars[18], anim: anims[6] },
+  { char: chars[19], anim: anims[1] },
+  { char: chars[20], anim: anims[2] },
+  { char: chars[21], anim: anims[3] },
+  { char: chars[22], anim: anims[4] },
+  { char: chars[23], anim: anims[5] },
+  { char: chars[24], anim: anims[6] },
+  { char: chars[25], anim: anims[0] },
+];
 
 function animationLoop() {
   requestAnimationFrame(animationLoop);
@@ -357,6 +550,9 @@ interface ActiveAnims<T = any> {
 
 let activeAnims: ActiveAnims[] = [];
 
+//#endregion
+
+//Animations
 //C describes a constructor, I describes an interface, A describes the function for the Animation
 
 //#region Spots
@@ -687,4 +883,60 @@ function A_Eclipse(param: I_Eclipse) {
   //   ];
 }
 
+//#endregion
+
+//#region Circle Skew
+
+function C_CircleSkew() {
+  let _duration = 30;
+
+  let x = Math.floor(Math.random() * 2);
+  let y = Math.floor(Math.random() * 2);
+
+  let _params: I_CircleSkew = {
+    position: [canvas.width * x, canvas.height * y],
+    matrix: [1, 0, 0, 1, 0, 0],
+  };
+
+  activeAnims.push({
+    anim: A_CircleSkew,
+    duration: _duration,
+    params: _params,
+  });
+}
+
+interface I_CircleSkew {
+  position: number[];
+  matrix: number[];
+}
+
+function A_CircleSkew(param: I_CircleSkew) {
+  param.matrix.forEach((element) => {
+    element += Math.random() * 10;
+    console.log(element);
+  });
+
+  ctx!.save();
+
+  ctx!.beginPath();
+  ctx!.fillStyle = `hsl(${color.hue}, ${color.sat}%, ${color.light[1]}%)`;
+  ctx!.arc(
+    param.position[0],
+    param.position[1],
+    canvas.height / 2,
+    0,
+    2 * Math.PI,
+  );
+  ctx!.fill();
+  ctx!.transform(
+    param.matrix[0],
+    param.matrix[1],
+    param.matrix[2],
+    param.matrix[3],
+    param.matrix[4],
+    param.matrix[5],
+  );
+
+  ctx!.restore();
+}
 //#endregion

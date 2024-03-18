@@ -14,21 +14,29 @@
     <canvas id="canvas"></canvas>
     <div id="options">
       <div id="charSelect"></div>
-      <div id="notes">
-        <h1>Note Values</h1>
-        <p id="instructions">Note - Octave - Note Duration - Play Delay</p>
-        <div id="sfxSetter">
-          <div id="sfxNotes"></div>
-          <button id="addButton">+</button>
-          <button id="notesSet">Set</button>
+      <div id="wrapper">
+        <div id="notes">
+          <h1>Note Values</h1>
+          <p id="instructions">Note - Octave - Note Duration - Play Delay</p>
+          <div id="sfxSetter">
+            <div id="sfxNotes"></div>
+            <button id="addButton">+</button>
+          </div>
+          </button>
         </div>
-        </button>
-      </div>
-      <div id="animations">
-        <h1>Animation Pairings</h1>
-      </div>
-      <div id="randomization">
-        <h1>Randomized Values</h1>
+        <div id="animations">
+          <h1>Animation Pairings</h1>
+          <select id="animSet" style="display: block;"></select>
+        </div>
+        <div id="randomization">
+          <h1>Color</h1>
+          <div id="color">
+            <input id="hue" type="number" min="0" max="360">
+            <input id="saturation" type="number" min="0" max="100">
+            <input id="lightness" type="number" min="0" max="100">
+          </div>
+        </div>
+        <button id="notesSet">Set</button>
       </div>
     </div>
     <script type="module" src="./main.ts"></script>
